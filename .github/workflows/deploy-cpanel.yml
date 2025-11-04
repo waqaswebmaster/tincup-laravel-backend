@@ -1,0 +1,39 @@
+name: Deploy PHP Backend to cPanel
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to cPanel
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🚚 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 📤 Deploy to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftp
+          local-dir: ./
+          server-dir: ./tincup-laravel-backend/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            .env
+          
+      - name: ✅ Deployment Complete
+        run: |
+          echo "🎉 PHP Backend deployed successfully to cPanel!"
+          echo "📝 IMPORTANT: Copy .env.example to .env on the server"
+          echo "🔗 Test at: https://api.ibextools.com/api/auth/health"
