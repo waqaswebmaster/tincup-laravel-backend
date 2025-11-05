@@ -151,6 +151,56 @@ class AuthController {
         ]);
     }
 
+    public function completeOnboarding($userId, $request) {
+        $user = $this->userModel->findById($userId);
+
+        if (!$user) {
+            return $this->jsonResponse(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        // Update user profile with onboarding data
+        $updateData = [
+            'onboardingCompleted' => 1
+        ];
+
+        if (isset($request['firstName'])) {
+            $updateData['firstName'] = $request['firstName'];
+        }
+
+        if (isset($request['selectedCauses'])) {
+            $updateData['selectedCauses'] = json_encode($request['selectedCauses']);
+        }
+
+        if (isset($request['followedOrganizations'])) {
+            $updateData['followedOrganizations'] = json_encode($request['followedOrganizations']);
+        }
+
+        if (isset($request['notificationPreferences'])) {
+            $prefs = $request['notificationPreferences'];
+            if (isset($prefs['pushNotifications'])) {
+                $updateData['pushNotifications'] = $prefs['pushNotifications'] ? 1 : 0;
+            }
+            if (isset($prefs['emailNotifications'])) {
+                $updateData['emailNotifications'] = $prefs['emailNotifications'] ? 1 : 0;
+            }
+            if (isset($prefs['organizationUpdates'])) {
+                $updateData['organizationUpdates'] = $prefs['organizationUpdates'] ? 1 : 0;
+            }
+            if (isset($prefs['causeAlerts'])) {
+                $updateData['causeAlerts'] = $prefs['causeAlerts'] ? 1 : 0;
+            }
+        }
+
+        $this->userModel->updateProfile($userId, $updateData);
+        $updatedUser = $this->userModel->findById($userId);
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Onboarding completed successfully',
+            'data' => $this->sanitizeUser($updatedUser)
+        ]);
+    }
+
     private function generateToken($user, $expiresIn) {
         $header = base64_encode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $payload = base64_encode(json_encode([

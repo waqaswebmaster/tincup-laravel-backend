@@ -122,6 +122,9 @@ try {
     } elseif ($uri === '/api/auth/profile' && $method === 'PUT') {
         $userId = authenticateRequest();
         $authController->updateProfile($userId, $request);
+    } elseif ($uri === '/api/auth/complete-onboarding' && $method === 'POST') {
+        $userId = authenticateRequest();
+        $authController->completeOnboarding($userId, $request);
     } elseif ($uri === '/api/auth/logout' && $method === 'POST') {
         $userId = authenticateRequest();
         $authController->logout($userId);
